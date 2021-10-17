@@ -1,0 +1,61 @@
+body {
+}
+
+* {
+  user-select: none !important;
+  color: white;
+}
+
+
+#game {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  position: absolute;
+  overflow: hidden;
+
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: mediumaquamarine;
+
+  cursor: default;
+}
+
+
+#player {
+  position: absolute;
+  width: 100px;
+
+  left: 440px;
+  top: 380px;
+
+}
+
+#selection-rect {
+  position: absolute;
+
+  left: 0px;
+  top: 0px;
+  width: 0px;
+  height: 0px;
+  display: none;
+
+
+  border-style: dashed;
+  border-color: darkred;
+  border-width: 2px;
+
+
+}
+
+
+div {
+  position: absolute;
+
+}
+img {
+  position: absolute;
+  transform: translate(-50%, -50%);
+
+}
