@@ -14,20 +14,7 @@
 
 <body>
   <div id="game">
-    <img class="rat" src="rat-idle-full.png" 
-         style="left: 200px; top: 300px;"/>
-    <img class="rat" src="rat-idle-full.png" 
-         style="left: 550px; top: 340px;"/>
-    <img class="rat" src="rat-idle-full.png" 
-         style="left: 250px; top: 640px;"/>
-    <img class="rat" src="rat-idle-full.png" 
-         style="left: 722px; top: 892px;"/>
-    <img class="rat" src="rat-idle-full.png" 
-         style="left: 032px; top: 928px;"/>
-    <img class="rat" src="rat-idle-full.png" 
-         style="left: 943px; top: 992px;"/>
-    <img class="rat" src="rat-idle-full.png" 
-         style="left: 200px; top: 300px;"/>
+    <img class="rat" src="rat-idle-full.png" />
     <div id="selection-rect"></div>
   </div>
 
@@ -228,7 +215,39 @@
   player.pos = {x: 200, y: 200}
   player.speed = .1;
 
+  // mostly copied from
   // https://github.com/MaxBittker/walky/blob/master/src/movement.ts
+  function updatePlayer(player) {
+
+    let velocity = {x : 0, y: 0};
+    let pos = player.pos;
+
+    if (target != null) {
+      if (Math.abs(target.x - pos.x) > 10) {
+        velocity.x = player.speed * delta_time * (target.x < pos.x ? -1 : 1);
+      } else {
+        velocity.x = 0;
+      }
+
+      if (Math.abs(target.y - pos.y) > 10) {
+        velocity.y = player.speed * delta_time * (target.y < pos.y ? -1 : 1);
+      } else {
+        velocity.y = 0;
+      }
+
+    }
+
+
+    //console.log(player);
+    player.pos.x = player.pos.x + velocity.x;
+    player.pos.y = player.pos.y + velocity.y
+
+    // idk why i cna't do this outside of the fucntion...
+    playerElm.style.left= `${player.pos.x}px`;
+    playerElm.style.top= `${player.pos.y}px`;
+
+  }
+
   let ratSpeed = .5;
   let rats;
   function updateRat(ratElm) {
@@ -240,18 +259,18 @@
     let velocity = {x : 0, y: 0};
 
     let ratStyle = window.getComputedStyle(ratElm);
-    let ratY = parseInt(ratStyle.top);
-    let ratX = parseInt(ratStyle.left);
+    let ratTop = parseInt(ratStyle.top);
+    let ratLeft = parseInt(ratStyle.left);
 
     if (target != null) {
-      if (Math.abs(target.x - ratX) > 10) {
-        velocity.x = ratSpeed * delta_time * (target.x < ratX ? -1 : 1);
+      if (Math.abs(target.x - ratLeft) > 10) {
+        velocity.x = ratSpeed * delta_time * (target.x < ratLeft ? -1 : 1);
       } else {
         velocity.x = 0;
       }
 
-      if (Math.abs(target.y - ratY) > 10) {
-        velocity.y = ratSpeed * delta_time * (target.y < ratY ? -1 : 1);
+      if (Math.abs(target.y - ratTop) > 10) {
+        velocity.y = ratSpeed * delta_time * (target.y < ratTop ? -1 : 1);
       } else {
         velocity.y = 0;
       }
@@ -259,14 +278,14 @@
     }
 
     if (velocity.x == 0 && velocity.y == 0) {
-      ratElm.moving = false;
+      ratElm.moving == false;
     } else {
       //console.log(player);
-      ratX = ratX + velocity.x;
-      ratY = ratY + velocity.y
+      ratLeft = ratLeft + velocity.x;
+      ratTop = ratTop + velocity.y
 
-      ratElm.style.left= `${ratX}px`;
-      ratElm.style.top= `${ratY}px`;
+      ratElm.style.left= `${ratLeft}px`;
+      ratElm.style.top= `${ratTop}px`;
     }
 
   }
@@ -317,18 +336,8 @@
 
   function startGame() {
 
-    // scatter rats about the page
+    // get rats
     rats = document.getElementsByClassName("rat");
-    for (let i = 0; i < rats.length; i++) {
-      let ratElm = rats[i];
-
-      let top = Math.floor(Math.random() * 900);
-      let left = Math.floor(Math.random() * 900);
-      ratElm.style.left= `${left}px`;
-      ratElm.style.top= `${top}px`;
-      
-    }
-
 
     // start input
     window.addEventListener("mousedown", e => {
@@ -352,9 +361,8 @@
 
         for (let i = 0; i < rats.length; i++) {
           let ratElm = rats[i];
-          if (ratElm.selected == true) {
+          if (ratElm.selected) {
             ratElm.moving = true;
-            console.log(ratElm);
           }
         }
       }
@@ -373,27 +381,11 @@
           let ratElm = rats[i];
           
           let ratStyle = window.getComputedStyle(ratElm);
-          let ratY = parseInt(ratStyle.top);
-          let ratX = parseInt(ratStyle.left);
+          let ratTop = parseInt(ratStyle.top);
+          let ratLeft = parseInt(ratStyle.left);
 
-          let rectLeft = selRectStart.x;
-          let rectRight = selRectEnd.x;
-          let rectTop = selRectStart.y;
-          let rectBottom = selRectEnd.y
-
-          // acount for if we're selecting left-wise/up-wise
-          if (selRectEnd.x < selRectStart.x) {
-            rectLeft = selRectEnd.x;
-            rectRight = selRectStart.x
-          }
-
-          if (selRectEnd.y < selRectStart.y) {
-            rectTop = selRectEnd.y;
-            rectBottom = selRectStart.y;
-          }
-
-          if (rectLeft <= ratX && rectRight >= ratX &&
-              rectTop <= ratY && rectBottom >= ratY) {
+          if (selRectStart.x <= ratLeft && selRectEnd.x >= ratLeft &&
+              selRectStart.y <= ratTop && selRectEnd.y >= ratTop) {
             ratElm.style.borderStyle = "solid";
             ratElm.style.borderWidth = "2px";
             ratElm.style.borderColor = "aquamarine";
@@ -405,16 +397,9 @@
             console.log("un selected!");
 
           }
-        }
 
-        // also we select whatever rat the mouse is over
-        console.log(e.target);
-        if (e.target.className == "rat") {
-          let ratElm = e.target;
-          ratElm.style.borderStyle = "solid";
-          ratElm.style.borderWidth = "2px";
-          ratElm.style.borderColor = "aquamarine";
-          ratElm.selected = true;
+          
+
         }
       }
 
