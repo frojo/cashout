@@ -17,18 +17,24 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
+
+
   background: mediumaquamarine;
+  background-image: url("background.gif");
+  background-repeat: no-repeat;
+  background-size: 4000px;
 
   cursor: default;
 }
 
 
-#player {
+.rat {
   position: absolute;
-  width: 100px;
+  height: 60px;
 
   left: 440px;
   top: 380px;
+  transform: translate(-50%, -50%);
 
 }
 
@@ -43,7 +49,7 @@ body {
 
 
   border-style: dashed;
-  border-color: darkred;
+  border-color: aquamarine;
   border-width: 2px;
 
 

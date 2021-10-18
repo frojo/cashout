@@ -4,7 +4,7 @@
 
 <head>
 
-<title>friendmaker</title>
+<title>starcraft 3</title>
 
 
 <link rel="stylesheet" type="text/css" href="./main.css" />
@@ -13,11 +13,10 @@
 </head>
 
 <body>
-  <div id="game" ondragover="allowDrop(event)" ondrop="drop(event)">
-    <img id="player" src="kris.png" ondragstart="drag(event)">
+  <div id="game">
+    <img class="rat" src="rat-idle-full.png" />
     <div id="selection-rect"></div>
-    <div id="player-text" style='left: 400px; top: 300px;'>i feel stuck :(</div>
-
+  </div>
 
 <script>
   let friend_guid = 0;
@@ -28,7 +27,6 @@
   let selRectStart = {};
   let selRectEnd = {};
   let selRectElm = document.getElementById("selection-rect");
-  let selecting = false;
 
 
 
@@ -250,6 +248,48 @@
 
   }
 
+  let ratSpeed = .5;
+  let rats;
+  function updateRat(ratElm) {
+
+    if (!ratElm.moving) {
+      return;
+    }
+
+    let velocity = {x : 0, y: 0};
+
+    let ratStyle = window.getComputedStyle(ratElm);
+    let ratTop = parseInt(ratStyle.top);
+    let ratLeft = parseInt(ratStyle.left);
+
+    if (target != null) {
+      if (Math.abs(target.x - ratLeft) > 10) {
+        velocity.x = ratSpeed * delta_time * (target.x < ratLeft ? -1 : 1);
+      } else {
+        velocity.x = 0;
+      }
+
+      if (Math.abs(target.y - ratTop) > 10) {
+        velocity.y = ratSpeed * delta_time * (target.y < ratTop ? -1 : 1);
+      } else {
+        velocity.y = 0;
+      }
+
+    }
+
+    if (velocity.x == 0 && velocity.y == 0) {
+      ratElm.moving == false;
+    } else {
+      //console.log(player);
+      ratLeft = ratLeft + velocity.x;
+      ratTop = ratTop + velocity.y
+
+      ratElm.style.left= `${ratLeft}px`;
+      ratElm.style.top= `${ratTop}px`;
+    }
+
+  }
+
   function randSound() {
     return sounds[Math.floor(Math.random() * sounds.length)];
 
@@ -280,11 +320,14 @@
   let delta_time = 0;
   let tick_num = 0;
   function tick() {
-  
 
     delta_time= Date.now() - last_tick;
     last_tick = Date.now();
     tick_num++;
+
+    for (let i = 0; i < rats.length; i++) {
+      updateRat(rats[i]);
+    }
 
 
     window.requestAnimationFrame(tick);
@@ -293,24 +336,75 @@
 
   function startGame() {
 
+    // get rats
+    rats = document.getElementsByClassName("rat");
+
     // start input
     window.addEventListener("mousedown", e => {
-	    selRectStart = {x: e.pageX, y: e.pageY };
-	    selRectEnd = {x: e.pageX, y: e.pageY };
+      
+      // LEFT MOUSE BUTTON
+      if (e.button == 0) {
+	      selRectStart = {x: e.pageX, y: e.pageY };
+	      selRectEnd = {x: e.pageX, y: e.pageY };
 
-      selRectElm.style.left = `${selRectStart.x}px`;
-      selRectElm.style.top = `${selRectStart.y}px`;
-      selRectElm.style.display = "block";
+        selRectElm.style.left = `${selRectStart.x}px`;
+        selRectElm.style.top = `${selRectStart.y}px`;
+        selRectElm.style.width = "0px";
+        selRectElm.style.height = "0px";
+        selRectElm.style.display = "block";
+      }
 
-      selecting = true;
-      console.log("begin selection!");
+      // RIGHT MOUSE BUTTON
+      if (e.button == 2) {
+	      target = {x: e.pageX, y: e.pageY };
+        console.log(target);
+
+        for (let i = 0; i < rats.length; i++) {
+          let ratElm = rats[i];
+          if (ratElm.selected) {
+            ratElm.moving = true;
+          }
+        }
+      }
 
     });
 
     window.addEventListener("mouseup", e => {
-      selecting = false;
-      selRectElm.style.display = "none";
-      console.log("end selection!");
+
+      // LEFT MOUSE BUTTON
+      if (e.button == 0) {
+        selRectElm.style.display = "none";
+
+        // figure out who's in the selection area
+
+        for (let i = 0; i < rats.length; i++) {
+          let ratElm = rats[i];
+          
+          let ratStyle = window.getComputedStyle(ratElm);
+          let ratTop = parseInt(ratStyle.top);
+          let ratLeft = parseInt(ratStyle.left);
+
+          if (selRectStart.x <= ratLeft && selRectEnd.x >= ratLeft &&
+              selRectStart.y <= ratTop && selRectEnd.y >= ratTop) {
+            ratElm.style.borderStyle = "solid";
+            ratElm.style.borderWidth = "2px";
+            ratElm.style.borderColor = "aquamarine";
+            ratElm.selected = true;
+            console.log("selected!");
+          } else {
+            ratElm.style.borderStyle = "none";
+            ratElm.selected = false;
+            console.log("un selected!");
+
+          }
+
+          
+
+        }
+      }
+
+      if (e.button == 2) {
+      }
 
     });
 
@@ -341,8 +435,10 @@
       selRectElm.style.width = `${width}px`;
       selRectElm.style.height = `${height}px`;
     
-      console.log("end selection!");
     });
+
+    // disable context menu on right click
+    window.addEventListener("contextmenu", e => e.preventDefault());
 
     window.addEventListener("dragend", e => {
 	dragTarget = {x: e.pageX, y: e.pageY };

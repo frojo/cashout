@@ -1,5 +1,8 @@
 
-now: draw a rectangle
+now: leaf background
+
+later:
+get some rat gifs
 
 # 10/17
 
@@ -7,6 +10,12 @@ i haven't done anything since wednesday. and i didn't really do anything on wedn
 let's make an rts
 
 first let's draw a rectangle
+
+yay it works
+
+i wanted to try to get some gifs of rats from the videos i took
+but that will porbably be a lot of work...
+lets get a leaf background first
 
 # 10/13
 
